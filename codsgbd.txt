@@ -1,0 +1,681 @@
+CREATE TABLE CLIENT (
+    id_client NUMBER PRIMARY KEY,
+    nume_client VARCHAR2(50) NOT NULL,
+    prenume_client VARCHAR2(50) NOT NULL,
+    numar_telefon VARCHAR2(15) NOT NULL,
+    adresa_email VARCHAR2(100) NOT NULL
+);
+
+CREATE TABLE PROGRAMARE (
+    id_programare NUMBER PRIMARY KEY,
+    id_client NUMBER NOT NULL,
+    data_programarii DATE NOT NULL,
+    starea_programarii VARCHAR2(50) NOT NULL,
+    FOREIGN KEY (id_client) REFERENCES CLIENT(id_client)
+);
+
+
+
+CREATE TABLE SERVICIU (
+    id_serviciu NUMBER PRIMARY KEY,
+    tip_serviciu VARCHAR2(50) NOT NULL,
+    pret_serviciu NUMBER(10,2) NOT NULL
+);
+
+CREATE TABLE GESTIONARE_SERVICIU_PROGRAMARE (
+    id_programare NUMBER NOT NULL,
+    id_serviciu NUMBER NOT NULL,
+    PRIMARY KEY (id_programare, id_serviciu),
+    FOREIGN KEY (id_programare) REFERENCES PROGRAMARE(id_programare),
+    FOREIGN KEY (id_serviciu) REFERENCES SERVICIU(id_serviciu)
+);
+
+CREATE TABLE MANAGER (
+    id_manager NUMBER PRIMARY KEY,
+    nume_manager VARCHAR2(50) NOT NULL,
+    prenume_manager VARCHAR2(50) NOT NULL,
+    data_angajarii DATE NOT NULL,
+    salariu_manager NUMBER(10,2) NOT NULL,
+    numar_telefon_manager VARCHAR2(15) NOT NULL
+);
+
+CREATE TABLE ANGAJAT (
+    id_angajat NUMBER PRIMARY KEY,
+    id_manager NUMBER NOT NULL,
+    nume_angajat VARCHAR2(50) NOT NULL,
+    prenume_angajat VARCHAR2(50) NOT NULL,
+    data_angajarii DATE NOT NULL,
+    salariu_angajat NUMBER(10,2) NOT NULL,
+    FOREIGN KEY (id_manager) REFERENCES MANAGER(id_manager)
+);
+
+CREATE TABLE TRANZACTIE (
+    id_tranzactie NUMBER PRIMARY KEY,
+    id_client NUMBER NOT NULL,
+    id_manager NUMBER NOT NULL,
+    data_tranzactie DATE NOT NULL,
+    suma_totala NUMBER(10,2) NOT NULL,
+    FOREIGN KEY (id_client) REFERENCES CLIENT(id_client),
+    FOREIGN KEY (id_manager) REFERENCES MANAGER(id_manager)
+);
+
+CREATE TABLE VEHICUL (
+    id_vehicul NUMBER PRIMARY KEY,
+    id_tranzactie NUMBER NOT NULL,
+    marca_vehicul VARCHAR2(50) NOT NULL,
+    an_fabricatie NUMBER NOT NULL,
+    kilometraj NUMBER NOT NULL,
+    pret NUMBER(10,2) NOT NULL,
+    cantitate_disponibila NUMBER NOT NULL,
+    FOREIGN KEY (id_tranzactie) REFERENCES TRANZACTIE(id_tranzactie)
+);
+
+CREATE TABLE RECENZIE (
+    id_recenzie NUMBER PRIMARY KEY,
+    id_vehicul NUMBER NOT NULL,
+    nota_vehicul NUMBER(2) NOT NULL CHECK (nota_vehicul BETWEEN 1 AND 10),
+    data_recenzie DATE NOT NULL,
+    FOREIGN KEY (id_vehicul) REFERENCES VEHICUL(id_vehicul) ON DELETE CASCADE 
+);
+
+CREATE TABLE ACCESORIU (
+    id_accesoriu NUMBER PRIMARY KEY,
+    nume_accesoriu VARCHAR2(50) NOT NULL,
+    pret_accesoriu NUMBER(10,2) NOT NULL,
+    stoc_accesoriu NUMBER NOT NULL
+);
+
+CREATE TABLE DOTARI_EXTRA (
+    id_vehicul NUMBER NOT NULL,
+    id_accesoriu NUMBER NOT NULL,
+    PRIMARY KEY (id_vehicul, id_accesoriu),
+    FOREIGN KEY (id_vehicul) REFERENCES VEHICUL(id_vehicul),
+    FOREIGN KEY (id_accesoriu) REFERENCES ACCESORIU(id_accesoriu)
+);
+
+-- secventele pentru tabele independente 
+
+CREATE SEQUENCE client_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE serviciu_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE manager_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE accesoriu_seq START WITH 1 INCREMENT BY 1;
+
+
+-- dependente 
+
+CREATE SEQUENCE programare_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE angajat_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE tranzactie_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE vehicul_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE recenzie_seq START WITH 1 INCREMENT BY 1;
+
+-- client
+
+INSERT INTO CLIENT VALUES (client_seq.NEXTVAL, 'Mihai', 'George', '0721123456', 'mihai.george@gmail.com');
+INSERT INTO CLIENT VALUES (client_seq.NEXTVAL, 'Maftei', 'Stefan', '0732123456', 'maftei.stefan@gmail.com');
+INSERT INTO CLIENT VALUES (client_seq.NEXTVAL, 'Vasile', 'Ana', '0743123456', 'vasile.ana@gmail.com');
+INSERT INTO CLIENT VALUES (client_seq.NEXTVAL, 'Botezatu', 'Cosmin', '0754123456', 'botezatu.cosmin@gmail.com');
+INSERT INTO CLIENT VALUES (client_seq.NEXTVAL, 'Ursu', 'Vlad', '0765123456', 'ursu.vlad@gmail.com');
+
+SELECT * FROM CLIENT;
+
+-- serviciu
+
+INSERT INTO SERVICIU VALUES (serviciu_seq.NEXTVAL, 'Schimb ulei', 150.00);
+INSERT INTO SERVICIU VALUES (serviciu_seq.NEXTVAL, 'Revizie generala', 500.00);
+INSERT INTO SERVICIU VALUES (serviciu_seq.NEXTVAL, 'Rotire anvelope', 100.00);
+INSERT INTO SERVICIU VALUES (serviciu_seq.NEXTVAL, 'Diagnosticare', 200.00);
+INSERT INTO SERVICIU VALUES (serviciu_seq.NEXTVAL, 'Spalare exterior', 50.00);
+
+SELECT * FROM SERVICIU;
+
+-- manager
+
+INSERT INTO MANAGER VALUES (manager_seq.NEXTVAL, 'Chitu', 'Tudor', TO_DATE('2020-01-15', 'YYYY-MM-DD'), 7500.00, '0722123456');
+INSERT INTO MANAGER VALUES (manager_seq.NEXTVAL, 'Serban', 'Andrei', TO_DATE('2019-03-20', 'YYYY-MM-DD'), 8000.00, '0733123456');
+INSERT INTO MANAGER VALUES (manager_seq.NEXTVAL, 'Enescu', 'Cristina', TO_DATE('2021-05-10', 'YYYY-MM-DD'), 7000.00, '0744123456');
+INSERT INTO MANAGER VALUES (manager_seq.NEXTVAL, 'Neagu', 'Emilia', TO_DATE('2018-07-01', 'YYYY-MM-DD'), 8500.00, '0755123456');
+INSERT INTO MANAGER VALUES (manager_seq.NEXTVAL, 'Marin', 'Marian', TO_DATE('2022-02-14', 'YYYY-MM-DD'), 7200.00, '0766123456');
+
+SELECT * FROM MANAGER;
+
+-- accesoriu
+
+INSERT INTO ACCESORIU VALUES (accesoriu_seq.NEXTVAL, 'Covoras auto', 120.00, 50);
+INSERT INTO ACCESORIU VALUES (accesoriu_seq.NEXTVAL, 'Portbagaj portabil', 800.00, 20);
+INSERT INTO ACCESORIU VALUES (accesoriu_seq.NEXTVAL, 'Scaun copil', 300.00, 30);
+INSERT INTO ACCESORIU VALUES (accesoriu_seq.NEXTVAL, 'Navigatie GPS', 450.00, 15);
+INSERT INTO ACCESORIU VALUES (accesoriu_seq.NEXTVAL, 'Jante aliaj', 1500.00, 10);
+
+SELECT * FROM ACCESORIU;
+
+-- programare
+
+INSERT INTO PROGRAMARE VALUES (programare_seq.NEXTVAL, 1, TO_DATE('2023-10-10', 'YYYY-MM-DD'), 'Confirmata');
+INSERT INTO PROGRAMARE VALUES (programare_seq.NEXTVAL, 2, TO_DATE('2023-10-11', 'YYYY-MM-DD'), 'In asteptare');
+INSERT INTO PROGRAMARE VALUES (programare_seq.NEXTVAL, 3, TO_DATE('2023-10-12', 'YYYY-MM-DD'), 'Anulata');
+INSERT INTO PROGRAMARE VALUES (programare_seq.NEXTVAL, 4, TO_DATE('2023-10-13', 'YYYY-MM-DD'), 'Confirmata');
+INSERT INTO PROGRAMARE VALUES (programare_seq.NEXTVAL, 5, TO_DATE('2023-10-14', 'YYYY-MM-DD'), 'Confirmata');
+
+SELECT * FROM PROGRAMARE;
+
+-- angajat
+
+INSERT INTO ANGAJAT VALUES (angajat_seq.NEXTVAL, 1, 'Munteanu', 'Vlad', TO_DATE('2021-02-01', 'YYYY-MM-DD'), 4500.00);
+INSERT INTO ANGAJAT VALUES (angajat_seq.NEXTVAL, 2, 'Pavel', 'Ionut', TO_DATE('2020-06-15', 'YYYY-MM-DD'), 4800.00);
+INSERT INTO ANGAJAT VALUES (angajat_seq.NEXTVAL, 3, 'Dobre', 'Daniela', TO_DATE('2022-03-10', 'YYYY-MM-DD'), 4200.00);
+INSERT INTO ANGAJAT VALUES (angajat_seq.NEXTVAL, 4, 'Ionescu', 'Gabriel', TO_DATE('2019-11-05', 'YYYY-MM-DD'), 5000.00);
+INSERT INTO ANGAJAT VALUES (angajat_seq.NEXTVAL, 5, 'Dumitriu', 'David', TO_DATE('2023-01-20', 'YYYY-MM-DD'), 4000.00);
+
+SELECT * FROM ANGAJAT;
+
+-- tranzactie
+
+INSERT INTO TRANZACTIE VALUES (tranzactie_seq.NEXTVAL, 1, 1, TO_DATE('2023-10-10', 'YYYY-MM-DD'), 1500.00);
+INSERT INTO TRANZACTIE VALUES (tranzactie_seq.NEXTVAL, 2, 2, TO_DATE('2023-10-11', 'YYYY-MM-DD'), 2500.00);
+INSERT INTO TRANZACTIE VALUES (tranzactie_seq.NEXTVAL, 3, 3, TO_DATE('2023-10-12', 'YYYY-MM-DD'), 1800.00);
+INSERT INTO TRANZACTIE VALUES (tranzactie_seq.NEXTVAL, 4, 4, TO_DATE('2023-10-13', 'YYYY-MM-DD'), 3200.00);
+INSERT INTO TRANZACTIE VALUES (tranzactie_seq.NEXTVAL, 5, 5, TO_DATE('2023-10-14', 'YYYY-MM-DD'), 2000.00);
+
+SELECT * FROM TRANZACTIE;
+
+-- vehicul
+
+INSERT INTO VEHICUL VALUES (vehicul_seq.NEXTVAL, 1, 'Dacia', 2018, 120000, 9500.00, 3);
+INSERT INTO VEHICUL VALUES (vehicul_seq.NEXTVAL, 2, 'Volkswagen', 2020, 45000, 18500.00, 2);
+INSERT INTO VEHICUL VALUES (vehicul_seq.NEXTVAL, 3, 'Ford', 2019, 80000, 13500.00, 1);
+INSERT INTO VEHICUL VALUES (vehicul_seq.NEXTVAL, 4, 'Renault', 2017, 150000, 7500.00, 4);
+INSERT INTO VEHICUL VALUES (vehicul_seq.NEXTVAL, 5, 'BMW', 2021, 30000, 28500.00, 1);
+
+SELECT * FROM VEHICUL;
+
+-- recenzie
+
+INSERT INTO RECENZIE VALUES (recenzie_seq.NEXTVAL, 1, 9, TO_DATE('2023-10-10', 'YYYY-MM-DD'));
+INSERT INTO RECENZIE VALUES (recenzie_seq.NEXTVAL, 2, 8, TO_DATE('2023-10-11', 'YYYY-MM-DD'));
+INSERT INTO RECENZIE VALUES (recenzie_seq.NEXTVAL, 3, 7, TO_DATE('2023-10-12', 'YYYY-MM-DD'));
+INSERT INTO RECENZIE VALUES (recenzie_seq.NEXTVAL, 4, 10, TO_DATE('2023-10-13', 'YYYY-MM-DD'));
+INSERT INTO RECENZIE VALUES (recenzie_seq.NEXTVAL, 5, 9, TO_DATE('2023-10-14', 'YYYY-MM-DD'));
+
+SELECT * FROM RECENZIE;
+
+-- gestionare serviciu programare
+
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (1, 1);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (1, 2);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (2, 3);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (2, 4);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (3, 5);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (3, 1);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (4, 2);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (4, 3);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (5, 4);
+INSERT INTO GESTIONARE_SERVICIU_PROGRAMARE VALUES (5, 5);
+
+SELECT * FROM GESTIONARE_SERVICIU_PROGRAMARE;
+
+-- dotari extra
+
+INSERT INTO DOTARI_EXTRA VALUES (1, 1); 
+INSERT INTO DOTARI_EXTRA VALUES (1, 3); 
+INSERT INTO DOTARI_EXTRA VALUES (2, 2);
+INSERT INTO DOTARI_EXTRA VALUES (2, 4);
+INSERT INTO DOTARI_EXTRA VALUES (3, 5);
+INSERT INTO DOTARI_EXTRA VALUES (3, 1);
+INSERT INTO DOTARI_EXTRA VALUES (4, 2);
+INSERT INTO DOTARI_EXTRA VALUES (4, 3);
+INSERT INTO DOTARI_EXTRA VALUES (5, 4);
+INSERT INTO DOTARI_EXTRA VALUES (5, 5);
+
+SELECT * FROM DOTARI_EXTRA;
+
+CREATE OR REPLACE PROCEDURE raport_client_complet (
+    p_id_client CLIENT.id_client%TYPE
+) 
+IS
+    -- colectiile folosite
+    TYPE tablou_asociativ IS TABLE OF CLIENT%ROWTYPE INDEX BY PLS_INTEGER;
+    TYPE nested_table_servicii IS TABLE OF SERVICIU%ROWTYPE;
+    TYPE varray_vehicule IS VARRAY(100) OF VEHICUL%ROWTYPE;
+    
+    -- variabile
+    v_client          tablou_asociativ;
+    v_servicii        nested_table_servicii := nested_table_servicii();
+    v_vehicule        varray_vehicule := varray_vehicule();
+    v_max_id          CLIENT.id_client%TYPE;
+BEGIN
+    -- id-ul maxim pentru a verifica daca id-ul introdus de la tastatura exista
+    SELECT MAX(id_client) INTO v_max_id FROM CLIENT;
+
+    
+    IF p_id_client > v_max_id THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: ID-ul ' || p_id_client || ' depaseste numarul de clienti (' || v_max_id || ').');
+        RETURN;
+    END IF;
+
+    BEGIN
+        SELECT * INTO v_client(1) 
+        FROM CLIENT 
+        WHERE id_client = p_id_client;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            DBMS_OUTPUT.PUT_LINE('Eroare: Clientul cu ID ' || p_id_client || ' nu exista.');
+            RETURN;
+    END;
+
+    SELECT s.* 
+    BULK COLLECT INTO v_servicii
+    FROM SERVICIU s
+    JOIN GESTIONARE_SERVICIU_PROGRAMARE gsp ON s.id_serviciu = gsp.id_serviciu
+    JOIN PROGRAMARE p ON gsp.id_programare = p.id_programare
+    WHERE p.id_client = p_id_client;
+
+    SELECT v.* 
+    BULK COLLECT INTO v_vehicule
+    FROM VEHICUL v
+    JOIN TRANZACTIE t ON v.id_tranzactie = t.id_tranzactie
+    WHERE t.id_client = p_id_client;
+
+    DBMS_OUTPUT.PUT_LINE('--- RAPORT CLIENT ---');
+    DBMS_OUTPUT.PUT_LINE('Nume si prenume: ' || v_client(1).nume_client || ' ' || v_client(1).prenume_client);
+    DBMS_OUTPUT.PUT_LINE('Email: ' || v_client(1).adresa_email);
+
+    -- Afișare servicii
+    DBMS_OUTPUT.PUT_LINE('--- SERVICII UTILIZATE ---');
+    IF v_servicii.COUNT = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Nu exista servicii asociate pentru acest client.');
+    ELSE
+        FOR i IN 1..v_servicii.COUNT LOOP
+            DBMS_OUTPUT.PUT_LINE(v_servicii(i).tip_serviciu || ' - ' || v_servicii(i).pret_serviciu || ' RON');
+        END LOOP;
+    END IF;
+
+    -- Afișare vehicule
+    DBMS_OUTPUT.PUT_LINE('--- VEHICULE ACHIZITIONATE ---');
+    IF v_vehicule.COUNT = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Nu exista vehicule achizitionate de acest client.');
+    ELSE
+        FOR i IN 1..v_vehicule.COUNT LOOP
+            DBMS_OUTPUT.PUT_LINE(v_vehicule(i).marca_vehicul || ' (' || v_vehicule(i).an_fabricatie || ')');
+        END LOOP;
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare neasteptata: ' || SQLERRM);
+END;
+/
+
+
+
+-- se introduce de la tastatura id-ul client-ului
+ACCEPT client_id NUMBER PROMPT 'Introduceti ID-ul clientului: ';
+
+
+BEGIN
+    raport_client_complet(&client_id);
+END;
+/
+
+-- cerinta 7 cursoare
+
+CREATE OR REPLACE PROCEDURE client_transaction_report 
+IS
+    -- cursor pentru clienti
+    CURSOR c_client IS
+        SELECT id_client, nume_client, prenume_client, adresa_email
+        FROM CLIENT;
+    
+    -- cursor parametrizat pentru tranzactii si vehicule, dependent de c_client
+    CURSOR c_transaction (p_id_client CLIENT.id_client%TYPE) IS
+        SELECT t.id_tranzactie, t.data_tranzactie, t.suma_totala,
+               v.marca_vehicul, v.an_fabricatie
+        FROM TRANZACTIE t
+        JOIN VEHICUL v ON t.id_tranzactie = v.id_tranzactie
+        WHERE t.id_client = p_id_client;
+BEGIN
+    
+    FOR client_rec IN c_client LOOP
+        
+        DBMS_OUTPUT.PUT_LINE('Client: ' || client_rec.nume_client || ' ' || client_rec.prenume_client);
+        DBMS_OUTPUT.PUT_LINE('Email: ' || client_rec.adresa_email);
+        DBMS_OUTPUT.PUT_LINE('---------------------');
+
+        --se parcurg tranzanctiile si vehiculele clientului curent
+        FOR trans_rec IN c_transaction(client_rec.id_client) LOOP
+            DBMS_OUTPUT.PUT_LINE('Tranzactie ID: ' || trans_rec.id_tranzactie);
+            DBMS_OUTPUT.PUT_LINE('Data: ' || TO_CHAR(trans_rec.data_tranzactie, 'DD-MM-YYYY'));
+            DBMS_OUTPUT.PUT_LINE('Suma: ' || trans_rec.suma_totala || ' RON');
+            DBMS_OUTPUT.PUT_LINE('Vehicul achizitionat: ' || trans_rec.marca_vehicul || ' (' || trans_rec.an_fabricatie || ')');
+            DBMS_OUTPUT.PUT_LINE('---------------------');
+        END LOOP;
+
+        DBMS_OUTPUT.NEW_LINE;
+    END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: ' || SQLERRM);
+END;
+/
+
+BEGIN
+    client_transaction_report();
+END;
+
+
+
+-- cerinta 8 3 tabele
+
+-- adaugam un manager 6 care sa nu aibe tranzactie asociata 
+-- adaugam vehicule la o noua tranzactie
+
+INSERT INTO MANAGER VALUES (6, 'Popa', 'Teodor', TO_DATE('2021-09-22', 'YYYY-MM-DD'), 8000.00, '0767123456')
+COMMIT;
+INSERT INTO TRANZACTIE (id_tranzactie, id_client, id_manager, data_tranzactie, suma_totala) VALUES (tranzactie_seq.NEXTVAL, 1, 1, SYSDATE, 0); -- Exemplu: id_client = 1
+COMMIT;
+INSERT INTO VEHICUL (id_vehicul, id_tranzactie, marca_vehicul, an_fabricatie, kilometraj, pret, cantitate_disponibila) VALUES (vehicul_seq.NEXTVAL, tranzactie_seq.CURRVAL, 'Dacia Logan', 2020, 15000, 10000.00, 1);
+
+
+INSERT INTO VEHICUL (id_vehicul, id_tranzactie, marca_vehicul, an_fabricatie, kilometraj, pret, cantitate_disponibila) VALUES (vehicul_seq.NEXTVAL, tranzactie_seq.CURRVAL, 'Renault Clio', 2021, 10000, 12000.00, 1);
+
+COMMIT;
+
+SELECT * FROM TRANZACTIE WHERE id_manager = 1;
+SELECT * FROM VEHICUL WHERE id_tranzactie = 21;
+
+CREATE OR REPLACE FUNCTION suma_pret_vehicule_manager (
+    p_id_manager MANAGER.id_manager%TYPE
+) RETURN NUMBER
+IS
+    v_pret_vehicul VEHICUL.pret%TYPE; 
+    v_manager_exists NUMBER;
+BEGIN
+    
+    SELECT COUNT(*) INTO v_manager_exists
+    FROM MANAGER
+    WHERE id_manager = p_id_manager;
+
+    IF v_manager_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Managerul cu ID ' || p_id_manager || ' nu există.');
+    END IF;
+
+    -- fara sum() pentru a scoate too_many_rows
+    SELECT V.pret
+    INTO v_pret_vehicul
+    FROM TRANZACTIE T
+    JOIN VEHICUL V ON T.id_tranzactie = V.id_tranzactie
+    WHERE T.id_manager = p_id_manager;
+
+    RETURN v_pret_vehicul;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Managerul cu ID ' || p_id_manager || ' nu are tranzacții.');
+    WHEN TOO_MANY_ROWS THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Interogarea a returnat mai multe rezultate decat era asteptat.');
+    WHEN OTHERS THEN
+        RAISE;
+END;
+/
+
+-- testarea pentru too_many_rows
+DECLARE
+    v_suma NUMBER;
+BEGIN
+    v_suma := suma_tranzactii_manager(1); 
+    DBMS_OUTPUT.PUT_LINE('Suma totală: ' || v_suma || ' RON');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: ' || SQLERRM); 
+END;
+
+/
+-- valid
+DECLARE
+    v_suma NUMBER;
+BEGIN
+    v_suma := suma_tranzactii_manager(2); 
+    DBMS_OUTPUT.PUT_LINE('Suma totala: ' || v_suma || ' RON');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: ' || SQLERRM); 
+END;
+
+/
+
+
+-- testarea no_data_found caz 1 manager neexistent
+DECLARE
+    v_suma NUMBER;
+BEGIN
+    v_suma := suma_pret_vehicule_manager(99);
+    DBMS_OUTPUT.PUT_LINE('Suma totala: ' || v_suma || ' RON');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: ' || SQLERRM);
+END;
+/
+
+-- manager valid fara tranzactii 
+DECLARE
+    v_suma NUMBER;
+BEGIN
+    v_suma := suma_pret_vehicule_manager(6); 
+    DBMS_OUTPUT.PUT_LINE('Suma totala: ' || v_suma || ' RON');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: ' || SQLERRM);
+END;
+/
+
+CREATE OR REPLACE PROCEDURE raport_programari_client (
+    p_id_client CLIENT.id_client%TYPE,
+    p_data_start DATE,
+    p_data_end DATE
+)
+IS
+    -- exceptiile custom
+    client_inexistent EXCEPTION;
+    PRAGMA EXCEPTION_INIT(client_inexistent, -20010);
+    programari_inexistente EXCEPTION;
+    PRAGMA EXCEPTION_INIT(programari_inexistente, -20011);
+
+    v_client_exists NUMBER;
+    v_programari_count NUMBER;
+    v_suma_totala NUMBER := 0;
+BEGIN
+    SELECT COUNT(*) INTO v_client_exists FROM CLIENT WHERE id_client = p_id_client;
+    IF v_client_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20010, 'Clientul cu ID ' || p_id_client || ' nu exista in sistem');
+    END IF;
+
+    SELECT COUNT(*) INTO v_programari_count 
+    FROM PROGRAMARE 
+    WHERE id_client = p_id_client
+    AND data_programarii BETWEEN p_data_start AND p_data_end;
+    
+    IF v_programari_count = 0 THEN
+        RAISE_APPLICATION_ERROR(-20011, 'Nicio programare gasita pentru clientul ' || p_id_client || ' in perioada specificata');
+    END IF;
+
+    FOR rec IN (
+        SELECT 
+            c.nume_client,
+            p.data_programarii,
+            p.starea_programarii,
+            s.tip_serviciu,
+            s.pret_serviciu,
+            m.nume_manager,
+            m.prenume_manager,
+            t.suma_totala
+        FROM CLIENT c
+        JOIN PROGRAMARE p ON c.id_client = p.id_client
+        JOIN GESTIONARE_SERVICIU_PROGRAMARE gsp ON p.id_programare = gsp.id_programare
+        JOIN SERVICIU s ON gsp.id_serviciu = s.id_serviciu
+        JOIN TRANZACTIE t ON p.id_client = t.id_client
+        JOIN MANAGER m ON t.id_manager = m.id_manager
+        WHERE c.id_client = p_id_client
+        AND p.data_programarii BETWEEN p_data_start AND p_data_end
+    ) LOOP
+        v_suma_totala := v_suma_totala + rec.pret_serviciu;
+        
+        DBMS_OUTPUT.PUT_LINE('Client: ' || rec.nume_client);
+        DBMS_OUTPUT.PUT_LINE('Data programarii: ' || TO_CHAR(rec.data_programarii, 'DD-MM-YYYY'));
+        DBMS_OUTPUT.PUT_LINE('Stare: ' || rec.starea_programarii);
+        DBMS_OUTPUT.PUT_LINE('Serviciu: ' || rec.tip_serviciu || ' (' || rec.pret_serviciu || ' RON)');
+        DBMS_OUTPUT.PUT_LINE('Manager responsabil: ' || rec.nume_manager || ' ' || rec.prenume_manager);
+        DBMS_OUTPUT.PUT_LINE('----------------------------------');
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE('Suma totala cheltuita: ' || v_suma_totala || ' RON');
+
+EXCEPTION
+    WHEN client_inexistent THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: Clientul specificat nu exista in baza de date');
+    WHEN programari_inexistente THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: Nu exista programari in intervalul specificat');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare neasteptata: ' || SQLCODE || ' - ' || SQLERRM);
+END;
+/
+
+
+BEGIN
+    -- client  existent
+    raport_programari_client(1, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
+
+    -- client neexistent
+    raport_programari_client(999, TO_DATE('2023-01-01', 'YYYY-MM-DD'), TO_DATE('2023-12-31', 'YYYY-MM-DD'));
+
+    -- fara programari
+    raport_programari_client(1, TO_DATE('2030-01-01', 'YYYY-MM-DD'), TO_DATE('2030-12-31', 'YYYY-MM-DD'));
+END;
+/
+
+
+-- trigger la nivel de comanda
+
+CREATE TABLE audit_tranzactii (
+    id_audit NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    utilizator VARCHAR2(100),
+    tip_operatie VARCHAR2(10),
+    data_operatie DATE,
+    detalii VARCHAR2(500)
+);
+
+CREATE OR REPLACE TRIGGER trg_audit_tranzactii
+AFTER INSERT OR UPDATE OR DELETE ON TRANZACTIE
+FOR EACH ROW 
+DECLARE
+    v_tip_operatie VARCHAR2(10);
+BEGIN
+    
+    IF INSERTING THEN
+        v_tip_operatie := 'INSERT';
+    ELSIF UPDATING THEN
+        v_tip_operatie := 'UPDATE';
+    ELSIF DELETING THEN
+        v_tip_operatie := 'DELETE';
+    END IF;
+
+    
+    INSERT INTO audit_tranzactii (
+        utilizator,
+        tip_operatie,
+        data_operatie,
+        detalii
+    ) VALUES (
+        USER,
+        v_tip_operatie,
+        SYSDATE,
+        'Operatie pe tabela Tranzactie'
+    );
+END;
+/
+INSERT INTO TRANZACTIE (id_tranzactie, id_client, id_manager, data_tranzactie, suma_totala) VALUES (tranzactie_seq.NEXTVAL, 1, 1, TO_DATE('2021-03-27', 'YYYY-MM-DD'), 5000);
+COMMIT;
+DELETE FROM TRANZACTIE WHERE id_tranzactie = 21;
+COMMIT;
+
+SELECT * FROM audit_tranzactii WHERE tip_operatie = 'DELETE';
+SELECT * FROM audit_tranzactii;
+
+-- trigger la nivel de linie
+
+CREATE TABLE Audit_Salarii (
+    ID_Audit NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ID_Angajat NUMBER NOT NULL,
+    Salariu_Vechi NUMBER,
+    Salariu_Nou NUMBER,
+    Data_Modificare DATE,
+    Utilizator VARCHAR2(100)
+);
+
+CREATE OR REPLACE TRIGGER audit_salarii_trigger
+AFTER UPDATE OF salariu_angajat ON angajat 
+FOR EACH ROW
+BEGIN
+    INSERT INTO audit_salarii (
+        id_angajat,
+        salariu_vechi,
+        salariu_nou,
+        data_modificare,
+        utilizator
+    ) VALUES (
+        :OLD.id_angajat,
+        :OLD.salariu_angajat, 
+        :NEW.salariu_angajat,
+        SYSDATE,
+        USER
+    );
+END;
+/
+
+UPDATE angajat
+SET salariu_angajat = 5000
+WHERE id_angajat = 1;
+COMMIT;
+SELECT * FROM audit_salarii;
+
+-- ldd
+
+CREATE TABLE audit_ldd (
+    id_audit     NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    utilizator   VARCHAR2(100),
+    tip_operatie VARCHAR2(50),
+    obiect       VARCHAR2(100),
+    data_operatie DATE
+);
+
+CREATE OR REPLACE TRIGGER trg_audit_ldd
+AFTER CREATE OR ALTER OR DROP ON DATABASE
+DECLARE
+    v_tip_operatie VARCHAR2(50);
+    v_obiect      VARCHAR2(100);
+BEGIN
+    
+    v_tip_operatie := ORA_SYSEVENT;
+    v_obiect       := ORA_DICT_OBJ_NAME;
+
+    
+    INSERT INTO audit_ldd (
+        utilizator,
+        tip_operatie,
+        obiect,
+        data_operatie
+    ) VALUES (
+        USER,
+        v_tip_operatie,
+        v_obiect,
+        SYSDATE
+    );
+END;
+/
+
+CREATE TABLE test_ldd (
+    id NUMBER PRIMARY KEY,
+    nume VARCHAR2(50)
+);
+ALTER TABLE test_ldd ADD (descriere VARCHAR2(200));
+SELECT * FROM audit_ldd;
+
